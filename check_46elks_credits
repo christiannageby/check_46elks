@@ -1,14 +1,5 @@
 #!/usr/bin/python3
-import argparse
-import requests
-import json
-
-EXIT_CODES = {
-    "OK": 0,
-    "WARNING": 1,
-    "CRITICAL": 2,
-    "UNKNOWN": 3,
-}
+import argparse, requests, json, sys
 
 parser = argparse.ArgumentParser(description="icinga check for 46elks credits")
 
@@ -40,22 +31,22 @@ def main():
 				"CRITICAL - balance is under {} SEK, Current balance is {} SEK"
 				.format(arguments.critical, balance)
 			)
-			return EXIT_CODES["CRITICAL"]
+			return 2
 
 		elif float(balance) <= arguments.warning:
 			print(
 				"WARNING - balance is under {} SEK, Current balance is {} SEK"
 				.format(arguments.warning, balance)
 			)
-			return EXIT_CODES["WARNING"]
-
-		print("OK - balance is {} SEK".format(balance))
-		return EXIT_CODES["OK"]
+			return 1
+		else:
+			print("OK - balance is {} SEK".format(balance))
+			return 0
 	
 	except Exception as error:
 		print("UNKNOWN - Can't fetch balance due to {}".format(error))
-		return EXIT_CODES["UNKNOWN"]
+		return 3
 
 
 if __name__ == '__main__':
-	main()
+	sys.exit(main())
