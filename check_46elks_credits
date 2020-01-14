@@ -1,0 +1,61 @@
+#!/usr/bin/python3
+import argparse
+import requests
+import json
+
+EXIT_CODES = {
+    "OK": 0,
+    "WARNING": 1,
+    "CRITICAL": 2,
+    "UNKNOWN": 3,
+}
+
+parser = argparse.ArgumentParser(description="icinga check for 46elks credits")
+
+
+# Required arguments, username and password
+
+parser.add_argument("-u", type=str, dest="username", required=True)
+parser.add_argument("-p", type=str, dest="password", required=True)
+
+# Optional args, dafalut flags
+parser.add_argument("-w", type=int, dest="warning", default=20)
+parser.add_argument("-c", type=int, dest="critical", default=10)
+
+arguments = parser.parse_args()
+
+
+def main():
+	try:
+		response = json.loads(
+			requests.get(
+		  		'https://api.46elks.com/a1/me',
+		  		auth=(arguments.username, arguments.password)
+			).text
+		)
+		balance = format((response["balance"] / 1000), '.2f')
+
+		if float(balance) <= arguments.critical:
+			print(
+				"CRITICAL - balance is under {} SEK, Current balance is {} SEK"
+				.format(arguments.critical, balance)
+			)
+			return EXIT_CODES["CRITICAL"]
+
+		elif float(balance) <= arguments.warning:
+			print(
+				"WARNING - balance is under {} SEK, Current balance is {} SEK"
+				.format(arguments.warning, balance)
+			)
+			return EXIT_CODES["WARNING"]
+
+		print("OK - balance is {} SEK".format(balance))
+		return EXIT_CODES["OK"]
+	
+	except Exception as error:
+		print("UNKNOWN - Can't fetch balance due to {}".format(error))
+		return EXIT_CODES["UNKNOWN"]
+
+
+if __name__ == '__main__':
+	main()
