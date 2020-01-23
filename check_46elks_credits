@@ -23,7 +23,7 @@ def main():
                 auth=(arguments.username, arguments.password),
             ).text
         )
-        balance = format((response["balance"] / 1000), ".2f")
+        balance = format((response["balance"] / 10000), ".2f")
 
         if float(balance) <= arguments.critical:
             print(
